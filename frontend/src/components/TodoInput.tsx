@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { addTodo } from "../redux/todoSlice";
+import { addTodo } from "../redux/todoActions";
 const TodoInput = () => {
   const [title, setTitle] = useState("");
   const [dec, setDec] = useState("");
@@ -12,11 +12,7 @@ const TodoInput = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // set id
-    const id =
-      Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
-
-    dispatch(addTodo({ id, title, dec, status, priority }));
+    dispatch(addTodo({ title, dec, status, priority }) as any);
 
     // clear input
     setTitle("");

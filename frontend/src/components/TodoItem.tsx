@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import {
-  editTodo,
-  removeTodo,
-  toggleTodo,
-  type Todo,
-} from "../redux/todoSlice";
+import { editTodo, removeTodo, toggleTodo } from "../redux/todoActions";
+import type { Todo } from "../redux/todoSlice";
+import { type AppDispatch } from "../redux/store";
 
 type TodoItemProps = {
   item: Todo;
@@ -18,28 +15,28 @@ const TodoItem = ({ item }: TodoItemProps) => {
   const [editedStatus, setEditedStatus] = useState(item.status);
   const [editedPriority, setEditedPriority] = useState(item.priority);
 
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(
       editTodo({
-        id: item.id,
+        id: item._id,
         newTitle: editedTitle,
         newDec: editedDec,
         newStatus: editedStatus,
         newPriority: editedPriority,
-      })
+      }) as any
     );
     setIsEdit(false);
   };
 
   const handleDelete = () => {
-    dispatch(removeTodo(item.id));
+    dispatch(removeTodo(item._id));
   };
 
   const handleToggle = () => {
-    dispatch(toggleTodo(item.id));
+    dispatch(toggleTodo(item._id));
   };
 
   // after handleToggle, update　editedStatus
@@ -65,7 +62,7 @@ const TodoItem = ({ item }: TodoItemProps) => {
   }
 
   return (
-    <li key={item.id} className="border-1 border-gray-900 p-2">
+    <li key={item._id} className="border-1 border-gray-900 p-2">
       {isEdit ? (
         <form onSubmit={handleEditSubmit} className="flex flex-col gap-1">
           <div>
