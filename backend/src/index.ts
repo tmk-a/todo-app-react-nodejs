@@ -1,12 +1,12 @@
 import { app } from "./app";
-import { ENV, PORT } from "./env";
+import { PORT } from "./env";
 import {
   connectToMongoose,
   disconnectToMongoose,
 } from "./database/mongooseClient";
 
 app.listen(PORT, async () => {
-  console.log(`[server]: listening at http://localhost:${PORT} in ${ENV} mode`);
+  console.log(`[server]: listening at http://localhost:${PORT}`);
   try {
     await connectToMongoose();
   } catch (error) {
