@@ -1,7 +1,9 @@
 import { type Todo } from "../redux/todoSlice";
 
+const API_URL = import.meta.env.VITE_APP_API_URL;
+
 export const getAllTodos = async (): Promise<Todo[]> => {
-  const response = await fetch("http://localhost:8000/api/todos");
+  const response = await fetch(`${API_URL}/api/todos`);
   if (!response.ok) {
     throw new Error("Failed to fetch todos.");
   }
@@ -9,7 +11,7 @@ export const getAllTodos = async (): Promise<Todo[]> => {
 };
 
 export const createTodo = async (newTodo: Partial<Todo>): Promise<Todo> => {
-  const response = await fetch("http://localhost:8000/api/todos", {
+  const response = await fetch(`${API_URL}/api/todos`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newTodo),
@@ -33,7 +35,7 @@ export const updateTodo = async ({
   newStatus: string;
   newPriority: string;
 }) => {
-  const response = await fetch(`http://localhost:8000/api/todos/:${id}`, {
+  const response = await fetch(`${API_URL}/api/todos/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -51,7 +53,7 @@ export const updateTodo = async ({
 };
 
 export const updateTodoStates = async (id: string, newStatus: string) => {
-  const response = await fetch(`http://localhost:8000/api/todos/:${id}`, {
+  const response = await fetch(`${API_URL}/api/todos/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -66,7 +68,7 @@ export const updateTodoStates = async (id: string, newStatus: string) => {
 };
 
 export const deleteTodo = async (id: string) => {
-  const response = await fetch(`http://localhost:8000/api/todos/${id}`, {
+  const response = await fetch(`${API_URL}/api/todos/${id}`, {
     method: "DELETE",
   });
   if (!response.ok) {
