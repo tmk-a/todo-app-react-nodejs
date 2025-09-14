@@ -1,8 +1,15 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "./store";
+import {
+  getAllTodos,
+  addTodo,
+  editTodo,
+  removeTodo,
+  toggleTodo,
+} from "./todoActions";
 
 export type Todo = {
-  id: string;
+  _id: string;
   title: string;
   dec: string;
   status: string;
@@ -12,47 +19,21 @@ export type Todo = {
 type TodosState = {
   todos: Todo[];
   filterStatus: "all" | "todo" | "in-progress" | "done";
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
 };
 
 const initialState: TodosState = {
   todos: [],
   filterStatus: "all",
+  status: "idle",
+  error: null,
 };
 
 const todoSlice = createSlice({
   name: "todo",
   initialState,
   reducers: {
-    addTodo: (state, action: PayloadAction<Todo>) => {
-      state.todos.push(action.payload);
-    },
-    removeTodo: (state, action: PayloadAction<string>) => {
-      state.todos = state.todos.filter((todo) => todo.id !== action.payload);
-    },
-    toggleTodo: (state, action: PayloadAction<string>) => {
-      const todo = state.todos.find((t) => t.id === action.payload);
-      if (todo) {
-        todo.status = todo.status === "done" ? "in-progress" : "done";
-      }
-    },
-    editTodo: (
-      state,
-      action: PayloadAction<{
-        id: string;
-        newTitle: string;
-        newDec: string;
-        newStatus: string;
-        newPriority: string;
-      }>
-    ) => {
-      const todo = state.todos.find((t) => t.id === action.payload.id);
-      if (todo) {
-        todo.title = action.payload.newTitle;
-        todo.dec = action.payload.newDec;
-        todo.status = action.payload.newStatus;
-        todo.priority = action.payload.newPriority;
-      }
-    },
     updateFilter: (
       state,
       action: PayloadAction<TodosState["filterStatus"]>
@@ -60,10 +41,67 @@ const todoSlice = createSlice({
       state.filterStatus = action.payload;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      // getAllTodos
+      .addCase(getAllTodos.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(getAllTodos.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.todos = action.payload;
+      })
+      .addCase(getAllTodos.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = (action.payload as string) || "Failed to fetch todos.";
+      })
+
+      // addTodo
+      .addCase(addTodo.fulfilled, (state, action: PayloadAction<Todo>) => {
+        state.todos.push(action.payload);
+      })
+      .addCase(addTodo.rejected, (state, action) => {
+        state.error = (action.payload as string) || "Failed to add todo.";
+      })
+
+      // editTodo
+      .addCase(editTodo.fulfilled, (state, action: PayloadAction<Todo>) => {
+        const index = state.todos.findIndex(
+          (todo) => todo._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.todos[index] = action.payload;
+        }
+      })
+      .addCase(editTodo.rejected, (state, action) => {
+        state.error = (action.payload as string) || "Failed to edit todo.";
+      })
+
+      // toggleTodo
+      .addCase(toggleTodo.fulfilled, (state, action: PayloadAction<Todo>) => {
+        if (!action.payload) return;
+        const index = state.todos.findIndex(
+          (todo) => todo._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.todos[index] = action.payload;
+        }
+      })
+      .addCase(toggleTodo.rejected, (state, action) => {
+        state.error = (action.payload as string) || "Failed to toggle todo.";
+      })
+
+      // removeTodo
+      .addCase(removeTodo.fulfilled, (state, action: PayloadAction<string>) => {
+        state.todos = state.todos.filter((todo) => todo._id !== action.payload);
+      })
+      .addCase(removeTodo.rejected, (state, action) => {
+        state.error = (action.payload as string) || "Failed to delete todo.";
+      });
+  },
 });
 
-export const { addTodo, removeTodo, toggleTodo, editTodo, updateFilter } =
-  todoSlice.actions;
+export const { updateFilter } = todoSlice.actions;
 
 export const selectTodosState = (state: RootState) => state.todo;
 export const selectTodos = (state: RootState) => state.todo.todos;
